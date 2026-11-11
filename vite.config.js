@@ -1,10 +1,15 @@
-
-import { defineConfig } from "vite";
+import { defineConfig } from "vite-plus";
 
 export default defineConfig({
+  fmt: {},
+  lint: {
+    jsPlugins: [{ name: "vite-plus", specifier: "vite-plus/oxlint-plugin" }],
+    rules: { "vite-plus/prefer-vite-plus-imports": "error" },
+    options: { typeAware: true, typeCheck: true },
+  },
   server: {
     proxy: {
-      "/api": "http://localhost:3000"
-    }
-  }
+      "/api": "http://localhost:3000",
+    },
+  },
 });

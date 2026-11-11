@@ -1,7 +1,7 @@
 
 # RedeSolidária
 
-*Plataforma de Gestão de Empréstimos de Equipamentos Assistivos*
+**Plataforma de Gestão de Empréstimos de Equipamentos Assistivos**
 
 Projeto desenvolvido para a disciplina de Projeto Integrador Extensionista II (PIE II), do curso Superior de Tecnologia em Análise e Desenvolvimento de Sistemas da Universidade de Marília (UNIMAR).
 
@@ -24,19 +24,20 @@ A proposta busca contribuir para uma gestão mais eficiente dos recursos dispon�
 - HTML5
 - CSS3
 - JavaScript
-- Vite 8
+- Vite+ 1.6.0
 - Node.js
 - Express
 - dotenv
+- pnpm (gerenciamento de dependências)
 - Git e GitHub
 
 ## Funcionalidades implementadas — Atividade 1
 
 Nesta primeira etapa, foi desenvolvida a estrutura inicial da aplicação, incluindo:
 
-- Criação do projeto frontend com Vite.
+- Criação do projeto frontend com Vite+.
 - Configuração da API utilizando Node.js e Express.
-- Implementação da rota GET /api/health.
+- Implementação da rota `GET /api/health`.
 - Configuração do proxy para comunicação entre frontend e backend.
 - Página inicial exibindo o status da API.
 - Exibição da data e hora retornadas pelo servidor.
@@ -61,19 +62,20 @@ redesolidaria/
 └── README.md
 ```
 
-O arquivo `.env` deve ser criado localmente e não é enviado ao GitHub.
+A estrutura apresenta os principais arquivos do projeto. O arquivo `.env` é mantido localmente e não deve ser enviado ao GitHub.
 
 ## Como executar o projeto
 
-# Pré-requisitos
+### Pré-requisitos
 
 É necessário ter instalado:
 
-- Node.js
-- npm
 - Git
+- Vite+ (comando `vp`)
 
-# 1. Clonar o repositório
+O Vite+ gerencia a versão do Node.js utilizada pelo projeto e executa o gerenciador de pacotes configurado.
+
+### 1. Clonar o repositório
 
 Abra o terminal e execute:
 
@@ -87,15 +89,17 @@ Entre na pasta do projeto:
 cd redesolidaria
 ```
 
-# 2. Instalar as dependências
+### 2. Instalar as dependências
 
 Execute:
 
 ```bash
-npm install
+vp install
 ```
 
-# 3. Configurar as variáveis de ambiente
+Esse comando instala as dependências necessárias para executar a aplicação.
+
+### 3. Configurar as variáveis de ambiente
 
 Na raiz do projeto, crie um arquivo chamado `.env` com o seguinte conteúdo:
 
@@ -105,12 +109,12 @@ PORT=3000
 
 O arquivo `.env.example` contém um modelo dessa configuração.
 
-# 4. Iniciar o backend
+### 4. Iniciar o backend
 
 Abra um terminal na pasta do projeto e execute:
 
 ```bash
-npm run api
+vp run api
 ```
 
 A API Express será iniciada na porta 3000.
@@ -138,7 +142,7 @@ Mantenha o terminal do backend aberto.
 Em um segundo terminal, execute:
 
 ```bash
-npm run dev
+vp dev
 ```
 
 Acesse no navegador:
@@ -161,11 +165,13 @@ Data e hora: [data e hora da consulta]
 
 A aplicação possui duas partes principais:
 
-*Frontend:* desenvolvido com HTML, CSS e JavaScript, utilizando o Vite como servidor de desenvolvimento na porta 5173.
+**Frontend:** desenvolvido com HTML, CSS e JavaScript, utilizando o Vite+ como ferramenta de desenvolvimento. O servidor local funciona na porta 5173.
 
-*Backend:* desenvolvido com Node.js e Express, responsável por disponibilizar a API na porta 3000.
+**Backend:** desenvolvido com Node.js e Express, responsável por disponibilizar a API na porta 3000.
 
-O frontend realiza uma requisição à rota `/api/health`. O proxy configurado no Vite encaminha essa solicitação ao backend, que retorna uma resposta em formato JSON contendo o status da aplicação e a data e hora da consulta.
+O frontend realiza uma requisição à rota `/api/health`. O proxy configurado no Vite+ encaminha essa solicitação ao backend, que retorna uma resposta em formato JSON contendo o status da aplicação e a data e hora da consulta.
+
+Essa comunicação permite que o frontend consulte a API utilizando o mesmo endereço de origem, sem precisar acessar diretamente a porta do backend.
 
 ## Próximas etapas
 
