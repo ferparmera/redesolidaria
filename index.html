@@ -1,13 +1,26 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>redesolidaria</title>
+    <title>RedeSolidária</title>
   </head>
+
   <body>
-    <div id="app"></div>
+    <header class="topo">
+      <a class="marca" href="#/doadores">RedeSolidária</a>
+
+      <nav aria-label="Menu principal">
+        <a href="#/doadores">Doadores</a>
+        <a href="#/doacoes/nova">Registrar doação</a>
+        <a href="#/doacoes">Histórico de doações</a>
+      </nav>
+    </header>
+
+    <main id="app"></main>
+
+    <footer class="rodape">RedeSolidária — API: <span id="status-api">Verificando...</span></footer>
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

@@ -1,35 +1,48 @@
-
 import "./style.css";
 
+import { verificarSaude, verificarBanco } from "./api.js";
+import { telaDoadores } from "./pages/doadores.js";
+import { telaNovaDoacao, telaDoacoes } from "./pages/doacoes.js";
+
 const app = document.querySelector("#app");
+const statusApi = document.querySelector("#status-api");
 
-app.innerHTML = `
-  <h1>RedeSolidária</h1>
-  <p>Plataforma de Gestão de Empréstimos de Equipamentos Assistivos</p>
-  <p>Status da API: <strong id="status">verificando...</strong></p>
-  <p>Data e hora: <span id="hora">--</span></p>
-`;
+// Rotas do frontend
+const rotas = {
+  "#/doadores": telaDoadores,
+  "#/doacoes/nova": telaNovaDoacao,
+  "#/doacoes": telaDoacoes,
+};
 
-async function verificarApi() {
-  const status = document.querySelector("#status");
-  const hora = document.querySelector("#hora");
+// Navegação entre as telas
+async function navegar() {
+  const rota = Object.hasOwn(rotas, location.hash) ? location.hash : "#/doadores";
 
-  try {
-    const resposta = await fetch("/api/health");
-
-    if (!resposta.ok) {
-      throw new Error("Erro na resposta da API");
+  for (const link of document.querySelectorAll("nav a")) {
+    if (link.getAttribute("href") === rota) {
+      link.setAttribute("aria-current", "page");
+    } else {
+      link.removeAttribute("aria-current");
     }
+  }
 
-    const dados = await resposta.json();
+  await rotas[rota](app);
+}
 
-    status.textContent = dados.status;
-    hora.textContent = new Date(dados.hora).toLocaleString("pt-BR");
-  } catch (erro) {
-    status.textContent = "indisponível";
-    hora.textContent = "--";
-    console.error("Erro ao consultar a API:", erro);
+// Verificar a API e o banco de dados
+async function verificarStatus() {
+  try {
+    const api = await verificarSaude();
+    const banco = await verificarBanco();
+
+    statusApi.textContent = `${api.status} | Banco: ${banco.status}`;
+  } catch {
+    statusApi.textContent = "Indisponível";
   }
 }
 
-verificarApi();
+// Inicializar a aplicação
+window.addEventListener("hashchange", navegar);
+
+await navegar();
+await verificarStatus();

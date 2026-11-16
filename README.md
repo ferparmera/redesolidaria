@@ -1,6 +1,6 @@
 # RedeSolidária
 
-**Plataforma de Gestão de Empréstimos de Equipamentos Assistivos**
+**Plataforma de Gestão de Doações e Empréstimos de Equipamentos Assistivos**
 
 Projeto desenvolvido para a disciplina de Projeto Integrador Extensionista II (PIE II), do curso Superior de Tecnologia em Análise e Desenvolvimento de Sistemas da Universidade de Marília (UNIMAR).
 
@@ -10,19 +10,17 @@ O RedeSolidária é uma proposta de plataforma web destinada a auxiliar institui
 
 O projeto utiliza como referência as atividades do Clube de Cadeira de Rodas João Leão de Carvalho, localizado em Assis/SP.
 
-A plataforma foi planejada para permitir que diferentes instituições administrem seus próprios doadores, doações, beneficiários, equipamentos, empréstimos e devoluções, mantendo seus registros organizados e separados.
+A plataforma foi planejada para permitir que diferentes instituições administrem seus próprios doadores, doações, beneficiários, equipamentos, empréstimos e devoluções.
 
 ## Objetivo
 
-Desenvolver uma solução web para apoiar o recebimento de doações de equipamentos assistivos, o controle do patrimônio disponível, o acompanhamento dos empréstimos e devoluções e a organização das informações utilizadas pelas instituições.
-
-A proposta busca facilitar a gestão dos recursos disponíveis e contribuir para o atendimento à comunidade.
+Desenvolver uma solução web para facilitar o recebimento de doações, o controle patrimonial de equipamentos assistivos e o acompanhamento de empréstimos e devoluções, contribuindo para uma gestão mais eficiente dos recursos disponíveis.
 
 ## Tecnologias utilizadas
 
 - HTML5
 - CSS3
-- JavaScript
+- JavaScript Vanilla
 - Vite+ 1.6.0
 - Node.js
 - Express
@@ -31,55 +29,92 @@ A proposta busca facilitar a gestão dos recursos disponíveis e contribuir para
 - dotenv
 - pnpm
 - Git e GitHub
-
-Para o desenvolvimento local, foi utilizado o XAMPP, que disponibiliza o MariaDB e o phpMyAdmin.
+- XAMPP e phpMyAdmin
+- REST Client
 
 ## Funcionalidades implementadas
 
-### Atividade 1 — Estrutura inicial e API
+### Aula 1 — Estrutura inicial
 
-- Criação do frontend com Vite+.
+- Criação do projeto com Vite+.
 - Configuração do backend com Node.js e Express.
-- Implementação da rota `GET /api/health`.
+- Implementação da rota GET /api/health.
 - Configuração do proxy entre frontend e backend.
-- Página inicial exibindo o status da API.
-- Exibição da data e hora retornadas pelo servidor.
-- Versionamento do projeto com Git e GitHub.
+- Comunicação inicial entre frontend e API.
+- Versionamento com Git e GitHub.
 
-### Atividade 2 — Banco de dados e integração
+### Aula 2 — Banco de dados
 
-- Criação do arquivo `database/schema.sql`.
-- Modelagem inicial de nove tabelas relacionadas.
+- Modelagem de nove tabelas relacionadas.
+- Criação do arquivo database/schema.sql.
 - Definição de chaves primárias e estrangeiras.
-- Configuração do MariaDB em ambiente local.
-- Execução do `schema.sql` duas vezes para testar sua recriação.
-- Instalação da biblioteca `mysql2`.
-- Configuração de um pool de conexões no arquivo `server/db.js`.
-- Implementação da rota `GET /api/db-health`.
-- Implementação da rota `GET /api/instituicoes`.
-- Teste de inserção de uma instituição fictícia no MariaDB.
-- Consulta bem-sucedida do registro pela API Express.
+- Configuração do MariaDB.
+- Integração do backend com mysql2.
+- Configuração de pool de conexões.
+- Implementação das rotas de verificação do banco e consulta de instituições.
 
-O cadastro realizado nesta etapa foi um teste manual pelo phpMyAdmin. Ainda não existe uma tela de cadastro nem uma rota POST para instituições.
+### Aula 3 — Backend e frontend integrados
+
+- Revisão da modelagem para minimização de dados pessoais.
+- Criação do arquivo database/seed.sql.
+- Inserção de registros fictícios.
+- Modularização das rotas do Express.
+- CRUD de doadores.
+- Exclusão lógica de doadores.
+- Listagem de equipamentos.
+- Registro de doações com múltiplos equipamentos.
+- Histórico de doações.
+- Consultas SQL com JOIN.
+- Consultas SQL parametrizadas.
+- Transações SQL com COMMIT e ROLLBACK.
+- Tratamento de patrimônios duplicados.
+- Interface responsiva.
+- Navegação SPA com hash routing.
+- Comunicação com a API utilizando fetch e async/await.
+- Tratamento de erros e mensagens de confirmação.
+- Testes manuais com REST Client.
+- Verificação e compilação utilizando Vite+.
+
+## Telas disponíveis
+
+| Endereço         | Funcionalidade                                    |
+| ---------------- | ------------------------------------------------- |
+| `#/doadores`     | Cadastro, listagem, edição e exclusão de doadores |
+| `#/doacoes/nova` | Registro de doações com múltiplos equipamentos    |
+| `#/doacoes`      | Histórico de doações recebidas                    |
+
+A interface foi desenvolvida para utilização em computadores, tablets e smartphones.
 
 ## Estrutura do projeto
 
 ```text
 redesolidaria/
 ├── database/
-│   └── schema.sql
+│   ├── schema.sql
+│   └── seed.sql
 ├── public/
 ├── server/
+│   ├── routes/
+│   │   ├── doadores.js
+│   │   ├── doacoes.js
+│   │   └── equipamentos.js
 │   ├── db.js
 │   └── index.js
 ├── src/
+│   ├── pages/
+│   │   ├── doadores.js
+│   │   └── doacoes.js
+│   ├── api.js
+│   ├── ui.js
 │   ├── main.js
 │   └── style.css
 ├── .env.example
 ├── .gitignore
+├── api.http
 ├── index.html
 ├── package.json
 ├── pnpm-lock.yaml
+├── pnpm-workspace.yaml
 ├── vite.config.js
 └── README.md
 ```
@@ -88,34 +123,42 @@ O arquivo `.env` contém configurações locais e não deve ser enviado ao GitHu
 
 ## Banco de dados
 
-O projeto utiliza MariaDB, compatível com os comandos MySQL utilizados na modelagem.
+O projeto utiliza MariaDB, com nove tabelas relacionadas.
 
-O arquivo `database/schema.sql` define as seguintes tabelas:
+| Tabela       | Finalidade                                        |
+| ------------ | ------------------------------------------------- |
+| instituicao  | Instituições cadastradas                          |
+| usuario      | Usuários e níveis de acesso                       |
+| beneficiario | Pessoas atendidas                                 |
+| doador       | Pessoas físicas ou jurídicas que realizam doações |
+| doacao       | Doações recebidas                                 |
+| equipamento  | Controle individual dos equipamentos              |
+| emprestimo   | Empréstimos e devoluções                          |
+| reserva      | Reservas de equipamentos                          |
+| manutencao   | Histórico de manutenções                          |
 
-| Tabela         | Finalidade                                        |
-| -------------- | ------------------------------------------------- |
-| `instituicao`  | Instituições cadastradas na plataforma            |
-| `usuario`      | Usuários e níveis de acesso                       |
-| `beneficiario` | Pessoas atendidas pelas instituições              |
-| `doador`       | Pessoas físicas ou jurídicas que realizam doações |
-| `doacao`       | Registro de doações recebidas                     |
-| `equipamento`  | Equipamentos disponíveis no patrimônio            |
-| `emprestimo`   | Empréstimos e devoluções                          |
-| `reserva`      | Solicitações de reserva de equipamentos           |
-| `manutencao`   | Registros de manutenção                           |
+Cada equipamento possui um número de patrimônio único dentro de sua instituição.
 
-As tabelas possuem relacionamentos definidos por chaves estrangeiras.
+Uma doação pode conter diversos equipamentos, permitindo seu controle individual.
 
-**Atenção:** o script contém `DROP DATABASE IF EXISTS redesolidaria`, que exclui o banco existente antes de recriá-lo. Sua execução apaga os dados armazenados nesse banco. Deve ser utilizado apenas em ambiente de desenvolvimento e testes, sem dados que precisem ser preservados.
+### Scripts SQL
+
+- `schema.sql`: criação da estrutura do banco.
+- `seed.sql`: inserção de registros fictícios para desenvolvimento e testes.
+
+**Atenção:** o arquivo schema.sql contém o comando DROP DATABASE IF EXISTS redesolidaria. Sua execução recria o banco e apaga os registros existentes.
+
+Utilize esse script somente em ambientes de desenvolvimento nos quais os dados possam ser descartados.
 
 ## Como executar o projeto
 
 ### Pré-requisitos
 
 - Git
-- Vite+ (comando `vp`)
+- Vite+ (comando vp)
+- Node.js
 - MariaDB ou MySQL
-- XAMPP, opcionalmente, para executar o MariaDB e acessar o phpMyAdmin
+- XAMPP (opcional)
 
 ### 1. Clonar o repositório
 
@@ -130,25 +173,40 @@ cd redesolidaria
 vp install
 ```
 
-Esse comando instala as dependências do projeto.
-
 ### 3. Preparar o banco de dados
 
-Inicie o serviço MySQL/MariaDB.
+Inicie o MariaDB.
 
-Caso utilize o XAMPP, inicie o módulo MySQL pelo XAMPP Control Panel.
-
-Acesse o phpMyAdmin:
+Caso utilize o XAMPP, inicie os módulos MySQL e Apache e acesse:
 
 http://localhost/phpmyadmin/
 
-Na página inicial do phpMyAdmin, utilize a opção **Importar** para selecionar o arquivo `database/schema.sql`.
+Em uma instalação nova e vazia, importe o arquivo:
 
-O script criará o banco de dados `redesolidaria` e suas nove tabelas.
+```text
+database/schema.sql
+```
+
+Antes de importar o seed.sql, cadastre uma instituição inicial de referência:
+
+```sql
+INSERT INTO redesolidaria.instituicao (nome, email)
+VALUES ('Instituicao Exemplo', 'contato@example.org');
+```
+
+Em seguida, importe:
+
+```text
+database/seed.sql
+```
+
+Isso reproduz a sequência utilizada durante o desenvolvimento, na qual a instituição fictícia do seed possui o identificador 2.
+
+O seed deve ser importado uma única vez, para evitar duplicidades.
 
 ### 4. Configurar as variáveis de ambiente
 
-Crie um arquivo `.env` na raiz do projeto com as seguintes configurações de exemplo:
+Crie o arquivo `.env` na raiz do projeto, utilizando o `.env.example` como referência.
 
 ```env
 PORT=3000
@@ -160,92 +218,35 @@ DB_PASSWORD=
 DB_NAME=redesolidaria
 ```
 
-Esses valores correspondem a uma configuração local típica do XAMPP, com usuário `root` sem senha. Caso a instalação utilize outras credenciais, ajuste as variáveis.
+As configurações acima correspondem a um ambiente local típico do XAMPP.
 
-O acesso `root` sem senha não deve ser utilizado em produção. Em ambientes publicados, deverá ser criado um usuário de banco com permissões limitadas e senha segura.
-
-O arquivo `.env` deve permanecer fora do versionamento Git.
+O usuário root sem senha não deve ser utilizado em produção.
 
 ### 5. Iniciar o backend
 
-No terminal, execute:
+No primeiro terminal:
 
 ```bash
 vp run api
 ```
 
-A API ficará disponível em:
+A API estará disponível em:
 
 http://localhost:3000
 
-Para verificar o funcionamento do Express, acesse:
+Para verificar seu funcionamento:
 
 http://localhost:3000/api/health
 
-Resposta de exemplo:
-
-```json
-{
-  "status": "ok",
-  "app": "RedeSolidária",
-  "hora": "2026-11-11T16:28:56.084Z"
-}
-```
-
-A data e a hora são geradas automaticamente.
-
-### 6. Testar a conexão com o banco
-
-Com o MariaDB em execução, acesse:
+Para verificar a conexão com o banco:
 
 http://localhost:3000/api/db-health
 
-Resposta obtida no ambiente de desenvolvimento:
+### 6. Iniciar o frontend
 
-```json
-{
-  "status": "ok",
-  "banco": "redesolidaria",
-  "versao": "10.11.16-MariaDB"
-}
-```
+Mantenha o backend em execução.
 
-Essa rota confirma que o backend consegue consultar o banco de dados.
-
-### 7. Consultar instituições
-
-Acesse:
-
-http://localhost:3000/api/instituicoes
-
-A rota consulta as colunas `id_instituicao`, `nome`, `email` e `ativo` da tabela `instituicao`.
-
-Se não houver instituições cadastradas, a resposta será:
-
-```json
-[]
-```
-
-Após cadastrar uma instituição fictícia de teste no banco, foi obtida a seguinte resposta:
-
-```json
-[
-  {
-    "id_instituicao": 1,
-    "nome": "Instituicao Exemplo",
-    "email": "contato@exemplo.org",
-    "ativo": 1
-  }
-]
-```
-
-Os dados são ilustrativos e foram cadastrados apenas para verificar o funcionamento da integração.
-
-### 8. Iniciar o frontend
-
-Mantenha o backend em execução e abra um segundo terminal.
-
-Execute:
+Em um segundo terminal, execute:
 
 ```bash
 vp dev
@@ -255,62 +256,147 @@ Acesse:
 
 http://localhost:5173
 
-A página inicial apresenta o nome do projeto, o status da API e a data e hora retornadas pelo servidor.
+A página inicial exibirá a tela de gerenciamento de doadores.
+
+O rodapé apresenta o status da API e do banco de dados.
 
 ## Arquitetura da aplicação
 
-O projeto utiliza uma arquitetura web com separação entre frontend, backend e banco de dados.
+O RedeSolidária utiliza uma arquitetura web com separação entre frontend, backend e banco de dados.
 
-**Frontend:** desenvolvido em HTML, CSS e JavaScript, utilizando Vite+ como ferramenta de desenvolvimento. Durante os testes locais, funciona na porta 5173.
+```text
+Navegador
+    |
+Frontend - Vite+ (porta 5173)
+    |
+API HTTP - Express (porta 3000)
+    |
+MariaDB (porta 3306)
+```
 
-**Backend:** desenvolvido em Node.js e Express, disponibilizando uma API HTTP na porta 3000.
+O frontend realiza requisições HTTP utilizando fetch.
 
-**Banco de dados:** MariaDB, responsável pelo armazenamento persistente dos registros. A comunicação é realizada pelo backend, utilizando a biblioteca `mysql2`.
+O proxy configurado no Vite+ encaminha as requisições iniciadas por /api ao servidor Express.
 
-O frontend utiliza `fetch` para consultar a API. O proxy configurado no Vite+ encaminha requisições com o prefixo `/api` ao backend Express.
+O backend executa consultas SQL no MariaDB por meio da biblioteca mysql2 e retorna os resultados em formato JSON.
 
-As rotas existentes até esta etapa são:
+## Rotas da API
 
-| Método | Rota                | Finalidade                         |
-| ------ | ------------------- | ---------------------------------- |
-| GET    | `/api/health`       | Verificar o funcionamento da API   |
-| GET    | `/api/db-health`    | Verificar a conexão com o MariaDB  |
-| GET    | `/api/instituicoes` | Consultar instituições cadastradas |
+| Método | Rota                | Finalidade                           |
+| ------ | ------------------- | ------------------------------------ |
+| GET    | `/api/health`       | Verificar o status da API            |
+| GET    | `/api/db-health`    | Verificar a conexão com o banco      |
+| GET    | `/api/instituicoes` | Listar instituições                  |
+| GET    | `/api/doadores`     | Listar doadores ativos               |
+| POST   | `/api/doadores`     | Cadastrar doador                     |
+| PUT    | `/api/doadores/:id` | Atualizar doador                     |
+| DELETE | `/api/doadores/:id` | Realizar exclusão lógica             |
+| GET    | `/api/equipamentos` | Listar equipamentos                  |
+| GET    | `/api/doacoes`      | Consultar histórico de doações       |
+| POST   | `/api/doacoes`      | Registrar doação e seus equipamentos |
 
-A autenticação, autorização e separação efetiva de acesso aos dados por instituição ainda serão implementadas. As rotas atuais são voltadas ao desenvolvimento local.
+### Exclusão lógica
 
-## Próximas etapas
+Os doadores excluídos permanecem armazenados no banco com o campo ativo definido como falso.
 
-- Implementar cadastros pela API REST.
-- Desenvolver o gerenciamento de doadores e doações.
-- Implementar o cadastro de beneficiários.
-- Implementar o cadastro e a consulta de equipamentos.
-- Desenvolver o registro de empréstimos e devoluções.
-- Aplicar autenticação e controle de acesso por instituição.
-- Implementar regras de disponibilidade dos equipamentos.
-- Adicionar controle de atrasos, reservas e manutenções.
-- Desenvolver telas integradas ao backend.
-- Criar relatórios e indicadores gerenciais.
-- Realizar testes e preparar a aplicação para publicação.
+Essa abordagem preserva o histórico de doações e os relacionamentos existentes.
 
-Essas funcionalidades fazem parte do planejamento do RedeSolidária e não devem ser consideradas implementadas nesta versão.
+### Transações SQL
+
+O registro de doações utiliza transações SQL para garantir que todos os equipamentos sejam cadastrados corretamente.
+
+Caso ocorra algum erro durante a operação, as inserções são desfeitas com ROLLBACK.
+
+Se todas as operações forem bem-sucedidas, os registros são confirmados com COMMIT.
+
+## Testes realizados
+
+O arquivo `api.http` contém requisições para testes manuais utilizando a extensão REST Client do VS Code.
+
+Foram realizados os seguintes testes:
+
+- Cadastro de doadores.
+- Consulta de doadores.
+- Atualização de doadores.
+- Exclusão lógica.
+- Consulta de equipamentos.
+- Consulta de doações.
+- Registro de doações com múltiplos equipamentos.
+- Bloqueio de patrimônios duplicados.
+- Verificação de rollback.
+- Integração entre frontend e backend.
+- Responsividade da interface.
+
+### Códigos HTTP utilizados
+
+| Código | Significado                     |
+| ------ | ------------------------------- |
+| 200    | Requisição bem-sucedida         |
+| 201    | Registro criado                 |
+| 204    | Operação concluída sem conteúdo |
+| 400    | Dados inválidos                 |
+| 404    | Registro não encontrado         |
+| 409    | Conflito de dados               |
+| 500    | Erro interno do servidor        |
+
+## Qualidade do código e build
+
+Para verificar a qualidade do código:
+
+```bash
+vp check
+```
+
+Para aplicar correções automáticas:
+
+```bash
+vp check --fix
+```
+
+Para gerar a versão de produção do frontend:
+
+```bash
+vp build
+```
+
+A versão gerada será armazenada na pasta dist/.
 
 ## Privacidade e proteção de dados (LGPD)
 
-O RedeSolidária adota o princípio da minimização de dados pessoais,
-armazenando somente as informações necessárias às atividades das
-instituições.
+O RedeSolidária adota medidas de minimização de dados pessoais, armazenando apenas informações justificadas pelas funcionalidades planejadas.
 
 Durante a revisão da modelagem, foram realizadas as seguintes alterações:
 
 - Remoção do CPF dos beneficiários.
 - Remoção do endereço residencial dos beneficiários.
 - Remoção do CPF/CNPJ dos doadores.
-- Manutenção dos identificadores internos para controle dos registros.
+- Manutenção dos identificadores internos.
 - Manutenção dos dados de contato necessários ao atendimento.
 
-As alterações foram aplicadas ao schema.sql e ao banco MariaDB existente,
-preservando os registros cadastrados.
+Os dados utilizados durante o desenvolvimento são fictícios.
+
+## Limitações da versão atual
+
+- A autenticação ainda não foi implementada.
+- As rotas de doadores, doações e equipamentos utilizam temporariamente a instituição de teste com ID 2.
+- A autorização e o isolamento de acesso por instituição ainda precisam ser implementados.
+- O sistema é destinado ao desenvolvimento local e não está preparado para uso em produção.
+
+## Próximas etapas
+
+- Autenticação de usuários com JWT.
+- Login e logout.
+- Controle de acesso por perfil.
+- Separação efetiva dos dados por instituição.
+- Cadastro e gerenciamento de beneficiários.
+- Gerenciamento completo dos equipamentos.
+- Registro de empréstimos e devoluções.
+- Controle de prazos e atrasos.
+- Reserva de equipamentos.
+- Registro de manutenções.
+- Dashboard e relatórios.
+- Testes de segurança.
+- Publicação da aplicação.
 
 ## Autor
 
