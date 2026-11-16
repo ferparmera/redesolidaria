@@ -1,0 +1,25 @@
+### Consultar doadores
+GET http://localhost:3000/api/doadores
+
+### Cadastrar doador
+POST http://localhost:3000/api/doadores
+Content-Type: application/json
+
+{
+    "nome": "Pedro Almeida",
+    "tipo_pessoa": "fisica",
+    "email": "pedro@example.org",
+    "telefone": null
+}
+### Atualizar doador
+PUT http://localhost:3000/api/doadores/4
+Content-Type: application/json
+
+{
+    "nome": "Pedro Almeida Santos",
+    "tipo_pessoa": "fisica",
+    "email": "pedro@example.org",
+    "telefone": "18900000000"
+}
+### Excluir doador
+DELETE http://localhost:3000/api/doadores/4
