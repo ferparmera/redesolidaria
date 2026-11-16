@@ -295,6 +295,23 @@ A autenticação, autorização e separação efetiva de acesso aos dados por in
 
 Essas funcionalidades fazem parte do planejamento do RedeSolidária e não devem ser consideradas implementadas nesta versão.
 
+## Privacidade e proteção de dados (LGPD)
+
+O RedeSolidária adota o princípio da minimização de dados pessoais,
+armazenando somente as informações necessárias às atividades das
+instituições.
+
+Durante a revisão da modelagem, foram realizadas as seguintes alterações:
+
+- Remoção do CPF dos beneficiários.
+- Remoção do endereço residencial dos beneficiários.
+- Remoção do CPF/CNPJ dos doadores.
+- Manutenção dos identificadores internos para controle dos registros.
+- Manutenção dos dados de contato necessários ao atendimento.
+
+As alterações foram aplicadas ao schema.sql e ao banco MariaDB existente,
+preservando os registros cadastrados.
+
 ## Autor
 
 **Fernando Campos**

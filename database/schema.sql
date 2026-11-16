@@ -34,9 +34,7 @@ CREATE TABLE beneficiario (
     id_beneficiario INT AUTO_INCREMENT PRIMARY KEY,
     id_instituicao INT NOT NULL,
     nome VARCHAR(150) NOT NULL,
-    cpf VARCHAR(11),
     telefone VARCHAR(20),
-    endereco VARCHAR(255),
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ativo BOOLEAN DEFAULT TRUE,
 
@@ -48,7 +46,6 @@ CREATE TABLE doador (
     id_instituicao INT NOT NULL,
     tipo_pessoa ENUM('fisica', 'juridica') NOT NULL,
     nome VARCHAR(150) NOT NULL,
-    cpf_cnpj VARCHAR(14),
     email VARCHAR(100),
     telefone VARCHAR(20),
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
