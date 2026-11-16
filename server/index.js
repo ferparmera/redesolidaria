@@ -2,11 +2,15 @@ import "dotenv/config";
 import express from "express";
 import { pool } from "./db.js";
 import doadoresRouter from "./routes/doadores.js";
+import equipamentosRouter from "./routes/equipamentos.js";
+import doacoesRouter from "./routes/doacoes.js";
 
 const app = express();
 
 app.use(express.json());
 app.use("/api/doadores", doadoresRouter);
+app.use("/api/equipamentos", equipamentosRouter);
+app.use("/api/doacoes", doacoesRouter);
 
 // Verifica se a API está funcionando
 app.get("/api/health", (req, res) => {

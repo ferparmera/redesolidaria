@@ -23,3 +23,56 @@ Content-Type: application/json
 }
 ### Excluir doador
 DELETE http://localhost:3000/api/doadores/4
+
+### Listar equipamentos
+GET http://localhost:3000/api/equipamentos
+
+### Listar doações
+GET http://localhost:3000/api/doacoes
+
+### Registrar doação com dois equipamentos
+POST http://localhost:3000/api/doacoes
+Content-Type: application/json
+
+{
+    "id_doador": 2,
+    "data_doacao": "2026-11-16",
+    "descricao": "Doação de equipamentos por Carlos Silva",
+    "equipamentos": [
+        {
+            "numero_patrimonio": "EQ-004",
+            "categoria": "Cadeira de banho",
+            "descricao": "Cadeira de banho com rodas",
+            "estado_conservacao": "bom"
+        },
+        {
+            "numero_patrimonio": "EQ-005",
+            "categoria": "Cama hospitalar",
+            "descricao": "Cama hospitalar articulada",
+            "estado_conservacao": "regular"
+        }
+    ]
+}
+### Testar rollback com patrimônio duplicado
+POST http://localhost:3000/api/doacoes
+Content-Type: application/json
+
+{
+    "id_doador": 2,
+    "data_doacao": "2026-11-16",
+    "descricao": "Teste de rollback",
+    "equipamentos": [
+        {
+            "numero_patrimonio": "EQ-006",
+            "categoria": "Muleta",
+            "descricao": "Muleta de teste",
+            "estado_conservacao": "bom"
+        },
+        {
+            "numero_patrimonio": "EQ-001",
+            "categoria": "Cadeira de rodas",
+            "descricao": "Patrimônio duplicado",
+            "estado_conservacao": "bom"
+        }
+    ]
+}
