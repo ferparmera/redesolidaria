@@ -76,3 +76,64 @@ Content-Type: application/json
         }
     ]
 }
+### Login com senha incorreta
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "voluntario@redesolidaria.example",
+  "senha": "errada"
+}
+
+### Login correto
+# @name login
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "voluntario@redesolidaria.example",
+  "senha": "redesolidaria123"
+}
+
+### Consultar doadores com token
+GET http://localhost:3000/api/doadores
+Authorization: Bearer {{login.response.body.token}}
+
+### Listar equipamentos com token
+GET http://localhost:3000/api/equipamentos
+Authorization: Bearer {{login.response.body.token}}
+
+### Listar doacoes com token
+GET http://localhost:3000/api/doacoes
+Authorization: Bearer {{login.response.body.token}}
+
+### Consultar instituicao autenticada
+GET http://localhost:3000/api/instituicoes
+Authorization: Bearer {{login.response.body.token}}
+
+### Cadastro sem autenticacao
+POST http://localhost:3000/api/doadores
+Content-Type: application/json
+
+{
+  "nome": "Teste sem token",
+  "tipo_pessoa": "fisica"
+}
+
+### Token invalido
+GET http://localhost:3000/api/doadores
+Authorization: Bearer token-invalido
+
+### Login da outra instituicao
+# @name login2
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "teste2@redesolidaria.example",
+  "senha": "redesolidaria123"
+}
+
+### Consultar doadores da outra instituicao
+GET http://localhost:3000/api/doadores
+Authorization: Bearer {{login2.response.body.token}}

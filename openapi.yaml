@@ -1,0 +1,335 @@
+openapi: 3.0.3
+
+info:
+  title: RedeSolidária API
+  version: 1.0.0
+  description: >
+    API REST para gestão de doadores, doações e equipamentos
+    assistivos de instituições sociais.
+    Projeto Integrador Extensionista II - ADS UNIMAR.
+
+servers:
+  - url: http://localhost:3000/api
+    description: Ambiente de desenvolvimento
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Autenticação
+  - name: Instituições
+  - name: Doadores
+  - name: Equipamentos
+  - name: Doações
+  - name: Status
+
+paths:
+  /health:
+    get:
+      tags: [Status]
+      summary: Verificar funcionamento da API
+      security: []
+      responses:
+        "200":
+          description: API funcionando
+
+  /db-health:
+    get:
+      tags: [Status]
+      summary: Verificar conexão com o banco de dados
+      security: []
+      responses:
+        "200":
+          description: Banco conectado
+        "500":
+          description: Falha na conexão
+
+  /auth/login:
+    post:
+      tags: [Autenticação]
+      summary: Autenticar usuário e gerar token JWT
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - senha
+              properties:
+                email:
+                  type: string
+                  format: email
+                senha:
+                  type: string
+                  format: password
+            example:
+              email: voluntario@redesolidaria.example
+              senha: redesolidaria123
+      responses:
+        "200":
+          description: Login realizado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  usuario:
+                    $ref: "#/components/schemas/Usuario"
+        "400":
+          description: E-mail ou senha não informados
+        "401":
+          description: Credenciais inválidas
+
+  /instituicoes:
+    get:
+      tags: [Instituições]
+      summary: Consultar instituição do usuário autenticado
+      responses:
+        "200":
+          description: Instituição do usuário
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "500":
+          description: Erro interno
+
+  /doadores:
+    get:
+      tags: [Doadores]
+      summary: Listar doadores ativos da instituição
+      responses:
+        "200":
+          description: Lista de doadores
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Doador"
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "500":
+          description: Erro interno
+
+    post:
+      tags: [Doadores]
+      summary: Cadastrar novo doador
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DoadorEntrada"
+      responses:
+        "201":
+          description: Doador cadastrado
+        "400":
+          description: Dados inválidos
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "500":
+          description: Erro interno
+
+  /doadores/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+
+    put:
+      tags: [Doadores]
+      summary: Atualizar doador da instituição
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DoadorEntrada"
+      responses:
+        "200":
+          description: Doador atualizado
+        "400":
+          description: Dados inválidos
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "404":
+          description: Doador não encontrado
+        "500":
+          description: Erro interno
+
+    delete:
+      tags: [Doadores]
+      summary: Desativar doador da instituição
+      responses:
+        "204":
+          description: Doador desativado
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "404":
+          description: Doador não encontrado
+        "500":
+          description: Erro interno
+
+  /equipamentos:
+    get:
+      tags: [Equipamentos]
+      summary: Listar equipamentos da instituição
+      responses:
+        "200":
+          description: Lista de equipamentos
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "500":
+          description: Erro interno
+
+  /doacoes:
+    get:
+      tags: [Doações]
+      summary: Consultar histórico de doações da instituição
+      responses:
+        "200":
+          description: Lista de doações e equipamentos associados
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "500":
+          description: Erro interno
+
+    post:
+      tags: [Doações]
+      summary: Registrar doação com equipamentos
+      description: >
+        Registra a doação e seus equipamentos em uma
+        transação no banco de dados.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id_doador
+                - data_doacao
+                - equipamentos
+              properties:
+                id_doador:
+                  type: integer
+                data_doacao:
+                  type: string
+                  format: date
+                descricao:
+                  type: string
+                equipamentos:
+                  type: array
+                  minItems: 1
+                  items:
+                    $ref: "#/components/schemas/EquipamentoEntrada"
+      responses:
+        "201":
+          description: Doação registrada
+        "400":
+          description: Dados inválidos
+        "401":
+          $ref: "#/components/responses/NaoAutorizado"
+        "404":
+          description: Doador não encontrado
+        "409":
+          description: Número de patrimônio duplicado
+        "500":
+          description: Erro interno
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    NaoAutorizado:
+      description: Token ausente, inválido ou expirado
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              erro:
+                type: string
+          example:
+            erro: Token ausente
+
+  schemas:
+    Usuario:
+      type: object
+      properties:
+        id_usuario:
+          type: integer
+        id_instituicao:
+          type: integer
+        nome:
+          type: string
+        email:
+          type: string
+          format: email
+        perfil:
+          type: string
+
+    DoadorEntrada:
+      type: object
+      required:
+        - nome
+        - tipo_pessoa
+      properties:
+        nome:
+          type: string
+        tipo_pessoa:
+          type: string
+          enum:
+            - fisica
+            - juridica
+        email:
+          type: string
+          nullable: true
+        telefone:
+          type: string
+          nullable: true
+
+    Doador:
+      allOf:
+        - $ref: "#/components/schemas/DoadorEntrada"
+        - type: object
+          properties:
+            id_doador:
+              type: integer
+            id_instituicao:
+              type: integer
+            ativo:
+              type: integer
+              enum: [0, 1]
+
+    EquipamentoEntrada:
+      type: object
+      required:
+        - numero_patrimonio
+        - categoria
+        - descricao
+        - estado_conservacao
+      properties:
+        numero_patrimonio:
+          type: string
+        categoria:
+          type: string
+        descricao:
+          type: string
+        estado_conservacao:
+          type: string
+          enum:
+            - novo
+            - bom
+            - regular
+            - ruim

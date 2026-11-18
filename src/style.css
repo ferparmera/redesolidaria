@@ -298,3 +298,94 @@ button.perigo:hover {
     font-size: 14px;
   }
 }
+/* Tela de login */
+
+.login {
+  min-height: 75vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+.login-cartao {
+  width: 100%;
+  max-width: 420px;
+  padding: 36px;
+}
+
+.login-cartao h1 {
+  text-align: center;
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.login-cartao > p {
+  text-align: center;
+  color: var(--texto-suave);
+  margin-bottom: 28px;
+}
+
+.login-cartao form label {
+  margin-bottom: 8px;
+}
+
+.login-cartao input {
+  margin-bottom: 20px;
+}
+
+.login-cartao button {
+  width: 100%;
+  padding: 13px;
+  margin-top: 8px;
+}
+
+#msg-login {
+  background: #fee2e2;
+  color: var(--perigo);
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Usuario autenticado */
+
+.area-usuario {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.area-usuario span {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.botao-sair {
+  background: transparent;
+  border: 1px solid rgb(255 255 255 / 60%);
+  color: white;
+}
+
+.botao-sair:hover {
+  background: var(--primaria-escura);
+}
+
+/* Responsividade do login */
+
+@media (max-width: 768px) {
+  .login {
+    min-height: 70vh;
+  }
+
+  .login-cartao {
+    padding: 24px;
+  }
+
+  .area-usuario {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

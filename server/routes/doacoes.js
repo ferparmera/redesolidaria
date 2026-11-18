@@ -3,7 +3,10 @@ import { pool } from "../db.js";
 
 const router = Router();
 
+// Consultar historico de doacoes
 router.get("/", async (req, res) => {
+  const idInstituicao = req.usuario.id_instituicao;
+
   try {
     const [linhas] = await pool.execute(
       `SELECT d.id_doacao, d.data_doacao,
@@ -22,7 +25,7 @@ router.get("/", async (req, res) => {
          AND d.id_instituicao = e.id_instituicao
        WHERE d.id_instituicao = ?
        ORDER BY d.data_doacao DESC, d.id_doacao DESC`,
-      [2],
+      [idInstituicao],
     );
 
     const doacoes = new Map();
@@ -59,8 +62,10 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Registrar doacao e equipamentos
 router.post("/", async (req, res) => {
-  const { id_doador, data_doacao, descricao, equipamentos } = req.body;
+  const idInstituicao = req.usuario.id_instituicao;
+  const { id_doador, data_doacao, descricao, equipamentos } = req.body ?? {};
 
   if (
     !Number.isInteger(id_doador) ||
@@ -104,7 +109,7 @@ router.post("/", async (req, res) => {
        AND id_instituicao = ?
        AND ativo = TRUE
        FOR UPDATE`,
-      [id_doador, 2],
+      [id_doador, idInstituicao],
     );
 
     if (doadores.length === 0) {
@@ -119,7 +124,7 @@ router.post("/", async (req, res) => {
       `INSERT INTO doacao
        (id_instituicao, id_doador, data_doacao, descricao, status)
        VALUES (?, ?, ?, ?, ?)`,
-      [2, id_doador, data_doacao, descricao || null, "recebida"],
+      [idInstituicao, id_doador, data_doacao, descricao || null, "recebida"],
     );
 
     const id_doacao = resultado.insertId;
@@ -131,7 +136,7 @@ router.post("/", async (req, res) => {
           categoria, descricao, estado_conservacao)
          VALUES (?, ?, ?, ?, ?, ?)`,
         [
-          2,
+          idInstituicao,
           id_doacao,
           equipamento.numero_patrimonio.trim(),
           equipamento.categoria.trim(),

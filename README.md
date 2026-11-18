@@ -21,12 +21,15 @@ Desenvolver uma solução web para facilitar o recebimento de doações, o contr
 - HTML5
 - CSS3
 - JavaScript Vanilla
-- Vite+ 1.6.0
+- Vite+
 - Node.js
 - Express
 - MariaDB / MySQL
 - mysql2
 - dotenv
+- jsonwebtoken (JWT)
+- bcryptjs
+- OpenAPI 3.0.3
 - pnpm
 - Git e GitHub
 - XAMPP e phpMyAdmin
@@ -73,15 +76,34 @@ Desenvolver uma solução web para facilitar o recebimento de doações, o contr
 - Comunicação com a API utilizando fetch e async/await.
 - Tratamento de erros e mensagens de confirmação.
 - Testes manuais com REST Client.
-- Verificação e compilação utilizando Vite+.
+
+### Aula 4 — Autenticação e segurança
+
+- Autenticação de usuários com JWT.
+- Armazenamento de senhas com bcrypt.
+- Geração e validação de tokens.
+- Expiração de tokens em oito horas.
+- Middleware de autenticação.
+- Proteção das rotas da API.
+- Retorno HTTP 401 para acessos não autorizados.
+- Identificação da instituição através do token JWT.
+- Isolamento de dados entre instituições.
+- Tela de login integrada ao frontend.
+- Persistência da sessão com localStorage.
+- Identificação do usuário autenticado.
+- Logout.
+- Envio automático do token nas requisições protegidas.
+- Testes de autenticação e isolamento entre instituições.
+- Documentação da API com OpenAPI.
 
 ## Telas disponíveis
 
-| Endereço         | Funcionalidade                                    |
-| ---------------- | ------------------------------------------------- |
-| `#/doadores`     | Cadastro, listagem, edição e exclusão de doadores |
-| `#/doacoes/nova` | Registro de doações com múltiplos equipamentos    |
-| `#/doacoes`      | Histórico de doações recebidas                    |
+| Endereço                        | Funcionalidade                                    |
+| ------------------------------- | ------------------------------------------------- |
+| Página inicial sem autenticação | Login                                             |
+| `#/doadores`                    | Cadastro, listagem, edição e exclusão de doadores |
+| `#/doacoes/nova`                | Registro de doações com múltiplos equipamentos    |
+| `#/doacoes`                     | Histórico de doações recebidas                    |
 
 A interface foi desenvolvida para utilização em computadores, tablets e smartphones.
 
@@ -98,12 +120,15 @@ redesolidaria/
 │   │   ├── doadores.js
 │   │   ├── doacoes.js
 │   │   └── equipamentos.js
+│   ├── auth.js
 │   ├── db.js
+│   ├── gerar-hash.js
 │   └── index.js
 ├── src/
 │   ├── pages/
 │   │   ├── doadores.js
-│   │   └── doacoes.js
+│   │   ├── doacoes.js
+│   │   └── login.js
 │   ├── api.js
 │   ├── ui.js
 │   ├── main.js
@@ -111,6 +136,7 @@ redesolidaria/
 ├── .env.example
 ├── .gitignore
 ├── api.http
+├── openapi.yaml
 ├── index.html
 ├── package.json
 ├── pnpm-lock.yaml
@@ -119,7 +145,7 @@ redesolidaria/
 └── README.md
 ```
 
-O arquivo `.env` contém configurações locais e não deve ser enviado ao GitHub.
+O arquivo `.env` contém configurações locais e informações sensíveis e não deve ser enviado ao GitHub.
 
 ## Banco de dados
 
@@ -128,7 +154,7 @@ O projeto utiliza MariaDB, com nove tabelas relacionadas.
 | Tabela       | Finalidade                                        |
 | ------------ | ------------------------------------------------- |
 | instituicao  | Instituições cadastradas                          |
-| usuario      | Usuários e níveis de acesso                       |
+| usuario      | Usuários e perfis de acesso                       |
 | beneficiario | Pessoas atendidas                                 |
 | doador       | Pessoas físicas ou jurídicas que realizam doações |
 | doacao       | Doações recebidas                                 |
@@ -143,10 +169,10 @@ Uma doação pode conter diversos equipamentos, permitindo seu controle individu
 
 ### Scripts SQL
 
-- `schema.sql`: criação da estrutura do banco.
-- `seed.sql`: inserção de registros fictícios para desenvolvimento e testes.
+- `database/schema.sql`: criação da estrutura do banco.
+- `database/seed.sql`: inserção de registros fictícios e usuário demonstrativo.
 
-**Atenção:** o arquivo schema.sql contém o comando DROP DATABASE IF EXISTS redesolidaria. Sua execução recria o banco e apaga os registros existentes.
+**Atenção:** o arquivo `schema.sql` contém o comando `DROP DATABASE IF EXISTS redesolidaria`. Sua execução recria o banco e apaga os registros existentes.
 
 Utilize esse script somente em ambientes de desenvolvimento nos quais os dados possam ser descartados.
 
@@ -181,7 +207,7 @@ Caso utilize o XAMPP, inicie os módulos MySQL e Apache e acesse:
 
 http://localhost/phpmyadmin/
 
-Em uma instalação nova e vazia, importe o arquivo:
+Em uma instalação nova e vazia, importe:
 
 ```text
 database/schema.sql
@@ -200,13 +226,13 @@ Em seguida, importe:
 database/seed.sql
 ```
 
-Isso reproduz a sequência utilizada durante o desenvolvimento, na qual a instituição fictícia do seed possui o identificador 2.
+O script insere os registros fictícios e o usuário demonstrativo utilizado para acessar a aplicação.
 
 O seed deve ser importado uma única vez, para evitar duplicidades.
 
 ### 4. Configurar as variáveis de ambiente
 
-Crie o arquivo `.env` na raiz do projeto, utilizando o `.env.example` como referência.
+Crie o arquivo `.env` na raiz do projeto utilizando o `.env.example` como referência.
 
 ```env
 PORT=3000
@@ -216,7 +242,18 @@ DB_PORT=3306
 DB_USER=root
 DB_PASSWORD=
 DB_NAME=redesolidaria
+
+JWT_SECRET=INSIRA_SUA_CHAVE_SECRETA
+JWT_EXPIRES_IN=8h
 ```
+
+Para gerar uma chave secreta aleatória, execute:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Copie o resultado para a variável `JWT_SECRET` no arquivo `.env`.
 
 As configurações acima correspondem a um ambiente local típico do XAMPP.
 
@@ -256,7 +293,22 @@ Acesse:
 
 http://localhost:5173
 
-A página inicial exibirá a tela de gerenciamento de doadores.
+A página inicial exibirá a tela de login.
+
+### 7. Credenciais demonstrativas
+
+Utilize a conta criada pelo arquivo seed.sql:
+
+| Campo  | Valor                            |
+| ------ | -------------------------------- |
+| Nome   | Voluntário Demo                  |
+| E-mail | voluntario@redesolidaria.example |
+| Senha  | redesolidaria123                 |
+| Perfil | Voluntário                       |
+
+Essas credenciais são exclusivamente demonstrativas e não devem ser utilizadas em produção.
+
+Após a autenticação, o usuário terá acesso às funcionalidades disponíveis para sua instituição.
 
 O rodapé apresenta o status da API e do banco de dados.
 
@@ -280,20 +332,47 @@ O proxy configurado no Vite+ encaminha as requisições iniciadas por /api ao se
 
 O backend executa consultas SQL no MariaDB por meio da biblioteca mysql2 e retorna os resultados em formato JSON.
 
+## Autenticação e isolamento de dados
+
+O sistema utiliza JSON Web Token (JWT) para autenticação.
+
+O fluxo funciona da seguinte maneira:
+
+1. O usuário informa e-mail e senha.
+2. O backend consulta o usuário no banco.
+3. A senha é validada utilizando bcrypt.
+4. O backend gera um token JWT assinado.
+5. O frontend armazena o token.
+6. As requisições protegidas enviam o token no cabeçalho Authorization.
+7. O middleware valida o token antes de permitir o acesso.
+
+```http
+Authorization: Bearer <token>
+```
+
+O identificador da instituição é obtido através do token autenticado e utilizado nas consultas e operações do banco de dados.
+
+Dessa forma, cada instituição acessa seus próprios registros, sem depender de um identificador fixo definido no código.
+
 ## Rotas da API
 
-| Método | Rota                | Finalidade                           |
-| ------ | ------------------- | ------------------------------------ |
-| GET    | `/api/health`       | Verificar o status da API            |
-| GET    | `/api/db-health`    | Verificar a conexão com o banco      |
-| GET    | `/api/instituicoes` | Listar instituições                  |
-| GET    | `/api/doadores`     | Listar doadores ativos               |
-| POST   | `/api/doadores`     | Cadastrar doador                     |
-| PUT    | `/api/doadores/:id` | Atualizar doador                     |
-| DELETE | `/api/doadores/:id` | Realizar exclusão lógica             |
-| GET    | `/api/equipamentos` | Listar equipamentos                  |
-| GET    | `/api/doacoes`      | Consultar histórico de doações       |
-| POST   | `/api/doacoes`      | Registrar doação e seus equipamentos |
+| Método | Rota                | Finalidade                       | Autenticação |
+| ------ | ------------------- | -------------------------------- | ------------ |
+| GET    | `/api/health`       | Verificar status da API          | Pública      |
+| GET    | `/api/db-health`    | Verificar conexão com o banco    | Pública      |
+| POST   | `/api/auth/login`   | Autenticar usuário               | Pública      |
+| GET    | `/api/instituicoes` | Consultar instituição do usuário | JWT          |
+| GET    | `/api/doadores`     | Listar doadores ativos           | JWT          |
+| POST   | `/api/doadores`     | Cadastrar doador                 | JWT          |
+| PUT    | `/api/doadores/:id` | Atualizar doador                 | JWT          |
+| DELETE | `/api/doadores/:id` | Realizar exclusão lógica         | JWT          |
+| GET    | `/api/equipamentos` | Listar equipamentos              | JWT          |
+| GET    | `/api/doacoes`      | Consultar histórico de doações   | JWT          |
+| POST   | `/api/doacoes`      | Registrar doação e equipamentos  | JWT          |
+
+A documentação das rotas está disponível no arquivo [openapi.yaml](openapi.yaml).
+
+As requisições para testes manuais estão disponíveis no arquivo [api.http](api.http).
 
 ### Exclusão lógica
 
@@ -303,17 +382,13 @@ Essa abordagem preserva o histórico de doações e os relacionamentos existente
 
 ### Transações SQL
 
-O registro de doações utiliza transações SQL para garantir que todos os equipamentos sejam cadastrados corretamente.
+O registro de doações utiliza transações SQL para garantir que a doação e seus equipamentos sejam cadastrados corretamente.
 
 Caso ocorra algum erro durante a operação, as inserções são desfeitas com ROLLBACK.
 
 Se todas as operações forem bem-sucedidas, os registros são confirmados com COMMIT.
 
 ## Testes realizados
-
-O arquivo `api.http` contém requisições para testes manuais utilizando a extensão REST Client do VS Code.
-
-Foram realizados os seguintes testes:
 
 - Cadastro de doadores.
 - Consulta de doadores.
@@ -326,6 +401,14 @@ Foram realizados os seguintes testes:
 - Verificação de rollback.
 - Integração entre frontend e backend.
 - Responsividade da interface.
+- Login com credenciais válidas.
+- Login com credenciais inválidas.
+- Acesso sem token JWT.
+- Acesso com token inválido.
+- Acesso com token válido.
+- Isolamento de consultas entre instituições distintas.
+- Persistência da sessão após atualização da página.
+- Logout.
 
 ### Códigos HTTP utilizados
 
@@ -335,6 +418,7 @@ Foram realizados os seguintes testes:
 | 201    | Registro criado                 |
 | 204    | Operação concluída sem conteúdo |
 | 400    | Dados inválidos                 |
+| 401    | Não autorizado                  |
 | 404    | Registro não encontrado         |
 | 409    | Conflito de dados               |
 | 500    | Erro interno do servidor        |
@@ -363,31 +447,34 @@ A versão gerada será armazenada na pasta dist/.
 
 ## Privacidade e proteção de dados (LGPD)
 
-O RedeSolidária adota medidas de minimização de dados pessoais, armazenando apenas informações justificadas pelas funcionalidades planejadas.
-
-Durante a revisão da modelagem, foram realizadas as seguintes alterações:
+O RedeSolidária adota medidas de minimização e proteção de dados pessoais.
 
 - Remoção do CPF dos beneficiários.
 - Remoção do endereço residencial dos beneficiários.
 - Remoção do CPF/CNPJ dos doadores.
 - Manutenção dos identificadores internos.
-- Manutenção dos dados de contato necessários ao atendimento.
+- Manutenção dos dados de contato necessários.
+- Armazenamento de senhas utilizando bcrypt.
+- Proteção das rotas com autenticação JWT.
+- Isolamento dos registros entre instituições.
+- Proteção das variáveis de ambiente.
+- Utilização de consultas SQL parametrizadas.
 
-Os dados utilizados durante o desenvolvimento são fictícios.
+Os registros utilizados durante o desenvolvimento são fictícios.
 
 ## Limitações da versão atual
 
-- A autenticação ainda não foi implementada.
-- As rotas de doadores, doações e equipamentos utilizam temporariamente a instituição de teste com ID 2.
-- A autorização e o isolamento de acesso por instituição ainda precisam ser implementados.
-- O sistema é destinado ao desenvolvimento local e não está preparado para uso em produção.
+- O controle de permissões por perfil ainda não foi implementado.
+- O gerenciamento de beneficiários ainda não possui interface.
+- Os módulos de empréstimos, devoluções, reservas e manutenções ainda não foram implementados na aplicação.
+- A expiração do token ainda não possui tratamento automático de redirecionamento no frontend.
+- O sistema utiliza localStorage para armazenamento do token.
+- A aplicação é destinada ao desenvolvimento local e não está preparada para uso em produção.
 
 ## Próximas etapas
 
-- Autenticação de usuários com JWT.
-- Login e logout.
 - Controle de acesso por perfil.
-- Separação efetiva dos dados por instituição.
+- Gerenciamento de usuários e instituições.
 - Cadastro e gerenciamento de beneficiários.
 - Gerenciamento completo dos equipamentos.
 - Registro de empréstimos e devoluções.
@@ -395,8 +482,13 @@ Os dados utilizados durante o desenvolvimento são fictícios.
 - Reserva de equipamentos.
 - Registro de manutenções.
 - Dashboard e relatórios.
-- Testes de segurança.
+- Ampliação dos testes automatizados e de segurança.
+- Aprimoramento da segurança para produção.
 - Publicação da aplicação.
+
+## Status do projeto
+
+MVP acadêmico desenvolvido ao longo das quatro aulas do Projeto Integrador Extensionista II.
 
 ## Autor
 

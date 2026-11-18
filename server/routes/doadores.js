@@ -3,7 +3,10 @@ import { pool } from "../db.js";
 
 const router = Router();
 
+// Listar doadores
 router.get("/", async (req, res) => {
+  const idInstituicao = req.usuario.id_instituicao;
+
   try {
     const [doadores] = await pool.execute(
       `SELECT id_doador, id_instituicao, tipo_pessoa,
@@ -12,7 +15,7 @@ router.get("/", async (req, res) => {
        WHERE id_instituicao = ?
        AND ativo = TRUE
        ORDER BY nome`,
-      [2],
+      [idInstituicao],
     );
 
     res.json(doadores);
@@ -25,9 +28,49 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Cadastrar doador
+router.post("/", async (req, res) => {
+  const idInstituicao = req.usuario.id_instituicao;
+  const { nome, tipo_pessoa, email, telefone } = req.body ?? {};
+
+  if (typeof nome !== "string" || !nome.trim()) {
+    return res.status(400).json({
+      erro: "O nome é obrigatório",
+    });
+  }
+
+  if (!["fisica", "juridica"].includes(tipo_pessoa)) {
+    return res.status(400).json({
+      erro: "Tipo de pessoa inválido",
+    });
+  }
+
+  try {
+    const [resultado] = await pool.execute(
+      `INSERT INTO doador
+       (id_instituicao, nome, tipo_pessoa, email, telefone)
+       VALUES (?, ?, ?, ?, ?)`,
+      [idInstituicao, nome.trim(), tipo_pessoa, email || null, telefone || null],
+    );
+
+    res.status(201).json({
+      mensagem: "Doador cadastrado com sucesso",
+      id_doador: resultado.insertId,
+    });
+  } catch (erro) {
+    console.error(erro);
+
+    res.status(500).json({
+      erro: "Erro ao cadastrar doador",
+    });
+  }
+});
+
+// Atualizar doador
 router.put("/:id", async (req, res) => {
+  const idInstituicao = req.usuario.id_instituicao;
   const { id } = req.params;
-  const { nome, tipo_pessoa, email, telefone } = req.body;
+  const { nome, tipo_pessoa, email, telefone } = req.body ?? {};
 
   if (typeof nome !== "string" || !nome.trim()) {
     return res.status(400).json({
@@ -48,7 +91,7 @@ router.put("/:id", async (req, res) => {
        WHERE id_doador = ?
        AND id_instituicao = ?
        AND ativo = TRUE`,
-      [nome.trim(), tipo_pessoa, email || null, telefone || null, id, 2],
+      [nome.trim(), tipo_pessoa, email || null, telefone || null, id, idInstituicao],
     );
 
     if (resultado.affectedRows === 0) {
@@ -68,7 +111,10 @@ router.put("/:id", async (req, res) => {
     });
   }
 });
+
+// Excluir doador logicamente
 router.delete("/:id", async (req, res) => {
+  const idInstituicao = req.usuario.id_instituicao;
   const { id } = req.params;
 
   try {
@@ -78,7 +124,7 @@ router.delete("/:id", async (req, res) => {
        WHERE id_doador = ?
        AND id_instituicao = ?
        AND ativo = TRUE`,
-      [id, 2],
+      [id, idInstituicao],
     );
 
     if (resultado.affectedRows === 0) {
@@ -96,39 +142,5 @@ router.delete("/:id", async (req, res) => {
     });
   }
 });
+
 export default router;
-router.post("/", async (req, res) => {
-  const { nome, tipo_pessoa, email, telefone } = req.body;
-
-  if (typeof nome !== "string" || !nome.trim()) {
-    return res.status(400).json({
-      erro: "O nome é obrigatório",
-    });
-  }
-
-  if (!["fisica", "juridica"].includes(tipo_pessoa)) {
-    return res.status(400).json({
-      erro: "Tipo de pessoa inválido",
-    });
-  }
-
-  try {
-    const [resultado] = await pool.execute(
-      `INSERT INTO doador
-       (id_instituicao, nome, tipo_pessoa, email, telefone)
-       VALUES (?, ?, ?, ?, ?)`,
-      [2, nome.trim(), tipo_pessoa, email || null, telefone || null],
-    );
-
-    res.status(201).json({
-      mensagem: "Doador cadastrado com sucesso",
-      id_doador: resultado.insertId,
-    });
-  } catch (erro) {
-    console.error(erro);
-
-    res.status(500).json({
-      erro: "Erro ao cadastrar doador",
-    });
-  }
-});

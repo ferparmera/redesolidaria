@@ -4,15 +4,18 @@ import { pool } from "./db.js";
 import doadoresRouter from "./routes/doadores.js";
 import equipamentosRouter from "./routes/equipamentos.js";
 import doacoesRouter from "./routes/doacoes.js";
+import auth, { autenticar } from "./auth.js";
+
+if (!process.env.JWT_SECRET) {
+  console.error("Defina JWT_SECRET no arquivo .env");
+  process.exit(1);
+}
 
 const app = express();
 
 app.use(express.json());
-app.use("/api/doadores", doadoresRouter);
-app.use("/api/equipamentos", equipamentosRouter);
-app.use("/api/doacoes", doacoesRouter);
 
-// Verifica se a API está funcionando
+// Verifica se a API esta funcionando
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
@@ -21,7 +24,7 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Verifica a conexão com o banco de dados
+// Verifica a conexao com o banco de dados
 app.get("/api/db-health", async (req, res) => {
   try {
     const [rows] = await pool.query("SELECT DATABASE() AS banco, VERSION() AS versao");
@@ -40,10 +43,23 @@ app.get("/api/db-health", async (req, res) => {
     });
   }
 });
+
+// Rota publica de login
+app.use("/api/auth", auth);
+
+// Autenticacao obrigatoria
+app.use("/api", autenticar);
+
+// Rotas protegidas
+app.use("/api/doadores", doadoresRouter);
+app.use("/api/equipamentos", equipamentosRouter);
+app.use("/api/doacoes", doacoesRouter);
+
 app.get("/api/instituicoes", async (req, res) => {
   try {
-    const [instituicoes] = await pool.query(
-      "SELECT id_instituicao, nome, email, ativo FROM instituicao",
+    const [instituicoes] = await pool.execute(
+      "SELECT id_instituicao, nome, email, ativo FROM instituicao WHERE id_instituicao = ?",
+      [req.usuario.id_instituicao],
     );
 
     res.json(instituicoes);
@@ -56,7 +72,16 @@ app.get("/api/instituicoes", async (req, res) => {
     });
   }
 });
-// Inicia o servidor depois de configurar as rotas
+
+// Tratamento de erros
+app.use((erro, req, res, _next) => {
+  console.error(erro);
+  res.status(500).json({
+    erro: "Erro interno do servidor",
+  });
+});
+
+// Inicia o servidor
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

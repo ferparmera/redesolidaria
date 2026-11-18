@@ -3,7 +3,10 @@ import { pool } from "../db.js";
 
 const router = Router();
 
+// Listar equipamentos da instituicao autenticada
 router.get("/", async (req, res) => {
+  const idInstituicao = req.usuario.id_instituicao;
+
   try {
     const [equipamentos] = await pool.execute(
       `SELECT id_equipamento, numero_patrimonio,
@@ -12,7 +15,7 @@ router.get("/", async (req, res) => {
        WHERE id_instituicao = ?
        AND ativo = TRUE
        ORDER BY categoria`,
-      [2],
+      [idInstituicao],
     );
 
     res.json(equipamentos);

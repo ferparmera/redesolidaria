@@ -65,3 +65,21 @@ VALUES
 
     (@instituicao, @doacao, 'EQ-003', 'Andador',
      'Andador de alumínio', 'bom');
+     
+-- Usuario de demonstracao para autenticacao
+-- Email: voluntario@redesolidaria.example
+-- Senha: redesolidaria123
+
+INSERT INTO usuario (
+    id_instituicao,
+    nome,
+    email,
+    senha_hash,
+    perfil
+) VALUES (
+    @instituicao,
+    'Voluntário Demo',
+    'voluntario@redesolidaria.example',
+    '$2b$10$D4.L0FJ0pQgNNRh8AugSROQ2EUMd480eiyY6KuijIhF8xV5RPOD.2',
+    'voluntario'
+);
